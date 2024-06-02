@@ -19,14 +19,18 @@ namespace WannaEngine {
             ~WannaVulkanSwapChain();
 
             bool ReCreate(); 
+            const std::vector<VkImage> &getImages() const { return mImages; }
+            uint32_t getWidth() const { return mSurfaceInfo.capabilities.currentExtent.width; }
+            uint32_t getHeight() const { return mSurfaceInfo.capabilities.currentExtent.height; }
 
+        
         private:
             void setSurfaceCapabilities();
 
-            VkSwapchainKHR myHandle = VK_NULL_HANDLE;
-            WannaVulkanContext *myContext;
-            WannaVulkanDevice *myDevice;
-            SurfaceInfo mySurfaceInfo;
+            VkSwapchainKHR mHandle = VK_NULL_HANDLE;
+            WannaVulkanContext *mContext;
+            WannaVulkanDevice *mDevice;
+            SurfaceInfo mSurfaceInfo;
             std::vector<VkImage> mImages;
     };
 }

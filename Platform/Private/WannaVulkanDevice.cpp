@@ -16,7 +16,7 @@ namespace WannaEngine {
 
     // 构造函数
     WannaVulkanDevice::WannaVulkanDevice(WannaVulkanContext *context, uint32_t graphicQueueCount, uint32_t presentQueueCount, const WannaVulkanSetting &settings) 
-        : mySettings(settings){
+        : mSettings(settings){
         if (!context) {
             LOG_ERROR("Must create a Vulkan graphic context before create device.");
             exit(EXIT_FAILURE);
@@ -107,14 +107,14 @@ namespace WannaEngine {
         for (int i = 0; i < graphicQueueCount; i++) {
             VkQueue queue;
             vkGetDeviceQueue(mHandle, graphicQueueInfo.queueFamilyIndex, i, &queue);
-            myGraphicQueues.push_back(std::make_shared<WannaVulkanQueue>(graphicQueueInfo.queueFamilyIndex, i, queue, false));
+            mGraphicQueues.push_back(std::make_shared<WannaVulkanQueue>(graphicQueueInfo.queueFamilyIndex, i, queue, false));
         }
 
         // 获取所有显示队列
         for (int j = 0; j < presentQueueCount; j++) {
             VkQueue queue;
             vkGetDeviceQueue(mHandle, presentQueueInfo.queueFamilyIndex, j, &queue);
-            myPresentQueues.push_back(std::make_shared<WannaVulkanQueue>(presentQueueInfo.queueFamilyIndex, j, queue, true));
+            mPresentQueues.push_back(std::make_shared<WannaVulkanQueue>(presentQueueInfo.queueFamilyIndex, j, queue, true));
         }
     }
 

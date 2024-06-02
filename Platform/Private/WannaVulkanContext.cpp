@@ -30,8 +30,8 @@ namespace WannaEngine {
 
     // 析构函数
     WannaVulkanContext::~WannaVulkanContext() {
-        vkDestroySurfaceKHR(myInstance, mySurface, nullptr);
-        vkDestroyInstance(myInstance, nullptr);
+        vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
+        vkDestroyInstance(mInstance, nullptr);
     }
 
     // 错误报告
@@ -136,8 +136,8 @@ namespace WannaEngine {
             .ppEnabledExtensionNames = enableExtensionCount > 0 ? enableExtensions : nullptr,
         };
 
-        CALL_VK(vkCreateInstance(&instanceInfo, nullptr, &myInstance));
-        LOG_TRACE("{0} : instance : {1}", __FUNCTION__, (void*)myInstance);
+        CALL_VK(vkCreateInstance(&instanceInfo, nullptr, &mInstance));
+        LOG_TRACE("{0} : instance : {1}", __FUNCTION__, (void*)mInstance);
     }
 
     // 创建表面
@@ -155,16 +155,16 @@ namespace WannaEngine {
             exit(EXIT_FAILURE);
         }
 
-        CALL_VK(glfwCreateWindowSurface(myInstance, glfwWin->GetWindowHandle(), nullptr, &mySurface));
-        LOG_TRACE("{0} : surface : {1}", __FUNCTION__, (void*)mySurface);
+        CALL_VK(glfwCreateWindowSurface(mInstance, glfwWin->GetWindowHandle(), nullptr, &mSurface));
+        LOG_TRACE("{0} : surface : {1}", __FUNCTION__, (void*)mSurface);
     }
 
     // 选择物理设备
     void WannaVulkanContext::SelectPhysicalDevice() {
         uint32_t physicDeviceCount;
-        CALL_VK(vkEnumeratePhysicalDevices(myInstance, &physicDeviceCount, nullptr));
+        CALL_VK(vkEnumeratePhysicalDevices(mInstance, &physicDeviceCount, nullptr));
         VkPhysicalDevice physicalDevices[physicDeviceCount];
-        CALL_VK(vkEnumeratePhysicalDevices(myInstance, &physicDeviceCount, physicalDevices));
+        CALL_VK(vkEnumeratePhysicalDevices(mInstance, &physicDeviceCount, physicalDevices));
 
         // 输出物理设备信息
         uint32_t maxScore = 0;
@@ -181,9 +181,9 @@ namespace WannaEngine {
             // 计分(选取分数最高的物理设备)
             uint32_t score = countPhysicalDeviceScore(&props);
             uint32_t formatCount;
-            CALL_VK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[i], mySurface, &formatCount, nullptr));
+            CALL_VK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[i], mSurface, &formatCount, nullptr));
             VkSurfaceFormatKHR formats[formatCount];
-            CALL_VK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[i], mySurface, &formatCount, formats));
+            CALL_VK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[i], mSurface, &formatCount, formats));
             for (int j = 0; j < formatCount; j++) {
                 // 检查设备是否支持RGB颜色格式和SRGB颜色空间
                 if (formats[j].format == VK_FORMAT_B8G8R8A8_UNORM && formats[j].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
@@ -208,26 +208,26 @@ namespace WannaEngine {
                 
                 // 1. 图形族(graphic family)
                 if (queueFamilyProperties[k].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                    myGraphicQueueFamily.queueFamilyIndex = k;
-                    myGraphicQueueFamily.queueCount = queueFamilyProperties[k].queueCount;
+                    mGraphicQueueFamily.queueFamilyIndex = k;
+                    mGraphicQueueFamily.queueCount = queueFamilyProperties[k].queueCount;
                 }
 
                 // 找到则跳出循环
-                if (myGraphicQueueFamily.queueFamilyIndex >= 0 && myPresentQueueFamily.queueFamilyIndex >= 0
-                    && myGraphicQueueFamily.queueFamilyIndex != myPresentQueueFamily.queueFamilyIndex) {
+                if (mGraphicQueueFamily.queueFamilyIndex >= 0 && mPresentQueueFamily.queueFamilyIndex >= 0
+                    && mGraphicQueueFamily.queueFamilyIndex != mPresentQueueFamily.queueFamilyIndex) {
                     break;
                 }
 
                 // 2. 显示族(present family)
                 VkBool32 bSupportSurface;
-                vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevices[i], k, mySurface, &bSupportSurface);
+                vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevices[i], k, mSurface, &bSupportSurface);
                 if (bSupportSurface) {
-                    myPresentQueueFamily.queueFamilyIndex = k;
-                    myPresentQueueFamily.queueCount = queueFamilyProperties[k].queueCount;
+                    mPresentQueueFamily.queueFamilyIndex = k;
+                    mPresentQueueFamily.queueCount = queueFamilyProperties[k].queueCount;
                 }
 
                 // 更新最大分数和最大分数索引
-                if (myGraphicQueueFamily.queueFamilyIndex >= 0 && myPresentQueueFamily.queueFamilyIndex >= 0) {
+                if (mGraphicQueueFamily.queueFamilyIndex >= 0 && mPresentQueueFamily.queueFamilyIndex >= 0) {
                     maxScore = score;
                     maxScorePhysicalDeviceIndex = i;
                 }
@@ -239,14 +239,14 @@ namespace WannaEngine {
             maxScorePhysicalDeviceIndex = 0;
         }
 
-        myPhysicalDevice = physicalDevices[maxScorePhysicalDeviceIndex];
+        mPhysicalDevice = physicalDevices[maxScorePhysicalDeviceIndex];
         // 获取设备内存大小
-        vkGetPhysicalDeviceMemoryProperties(myPhysicalDevice, &myPhysicalDeviceMemoryProperties);
+        vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &mPhysicalDeviceMemoryProperties);
 
         LOG_INFO("{0}: physical device:{1}, score:{2}, graphic queue: {3} : {4}, present queue: {5} : {6}", 
         __FUNCTION__, maxScorePhysicalDeviceIndex, maxScore,
-        myGraphicQueueFamily.queueFamilyIndex, myGraphicQueueFamily.queueCount,
-        myPresentQueueFamily.queueFamilyIndex, myPresentQueueFamily.queueCount);
+        mGraphicQueueFamily.queueFamilyIndex, mGraphicQueueFamily.queueCount,
+        mPresentQueueFamily.queueFamilyIndex, mPresentQueueFamily.queueCount);
     }
 
     // 打印物理设备信息

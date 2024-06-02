@@ -15,13 +15,13 @@ namespace WannaEngine {
             WannaVulkanContext(WannaWindow *win);
             ~WannaVulkanContext() override;
 
-            VkInstance GetInstance() const { return myInstance; }
-            VkSurfaceKHR GetSurface() const { return mySurface; }
-            VkPhysicalDevice GetPhysicalDevice() const { return myPhysicalDevice; }
-            const QueueFamilyInfo &GetGraphicQueueFamilyInfo() const { return myGraphicQueueFamily; }
-            const QueueFamilyInfo &GetPresentQueueFamilyInfo() const { return myPresentQueueFamily; }
-            VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties() const { return myPhysicalDeviceMemoryProperties;}
-            bool IsSameGraphicPresentQueueFamily() const { return myGraphicQueueFamily.queueFamilyIndex == myPresentQueueFamily.queueFamilyIndex; }
+            VkInstance GetInstance() const { return mInstance; }
+            VkSurfaceKHR GetSurface() const { return mSurface; }
+            VkPhysicalDevice GetPhysicalDevice() const { return mPhysicalDevice; }
+            const QueueFamilyInfo &GetGraphicQueueFamilyInfo() const { return mGraphicQueueFamily; }
+            const QueueFamilyInfo &GetPresentQueueFamilyInfo() const { return mPresentQueueFamily; }
+            VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties() const { return mPhysicalDeviceMemoryProperties;}
+            bool IsSameGraphicPresentQueueFamily() const { return mGraphicQueueFamily.queueFamilyIndex == mPresentQueueFamily.queueFamilyIndex; }
 
         private:
             static void printPhysicalDeviceInfo(VkPhysicalDeviceProperties *properties);
@@ -32,13 +32,13 @@ namespace WannaEngine {
             void SelectPhysicalDevice();
 
             bool bValidate = true;
-            VkInstance myInstance;
-            VkSurfaceKHR mySurface;
+            VkInstance mInstance;
+            VkSurfaceKHR mSurface;
 
-            VkPhysicalDevice myPhysicalDevice;
-            QueueFamilyInfo myGraphicQueueFamily;
-            QueueFamilyInfo myPresentQueueFamily;
-            VkPhysicalDeviceMemoryProperties myPhysicalDeviceMemoryProperties;
+            VkPhysicalDevice mPhysicalDevice;
+            QueueFamilyInfo mGraphicQueueFamily;
+            QueueFamilyInfo mPresentQueueFamily;
+            VkPhysicalDeviceMemoryProperties mPhysicalDeviceMemoryProperties;
     };
 }
 

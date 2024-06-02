@@ -13,7 +13,7 @@ struct DeviceFeature {
 // 宏封装检查结果调用
 #define CALL_VK(func) checkVulkanResult(func, __FILE__, __LINE__, #func)
 
-// 销毁宏
+// 销毁函数的封装宏
 #define VK_DESTROY(type, device, obj) if(obj != VK_NULL_HANDLE) vkDestroy##type(device, obj, nullptr)
 
 /**

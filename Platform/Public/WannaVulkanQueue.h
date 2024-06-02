@@ -12,9 +12,9 @@ namespace WannaEngine {
             void waitIdle() const;
 
         private:
-            uint32_t myFamilyIndex;
-            uint32_t myIndex;
-            VkQueue myQueue;
+            uint32_t mFamilyIndex;
+            uint32_t mIndex;
+            VkQueue mQueue;
             bool canPresent;
 
     };

@@ -3,7 +3,7 @@
 
 namespace WannaEngine {
     WannaVulkanRenderPass::WannaVulkanRenderPass(WannaVulkanDevice *device, const std::vector<VkAttachmentDescription> &attachments, const std::vector<RenderSubPass> &renderSubPasses) 
-    : myDevice(device), myAttachments(attachments), myRenderSubPasses(renderSubPasses) {
+    : mDevice(device), mAttachments(attachments), mRenderSubPasses(renderSubPasses) {
 
         // 1. 默认子流程及附着的构建
         if (renderSubPasses.empty()) {
@@ -19,18 +19,18 @@ namespace WannaEngine {
                     .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED, // 不关心之前的图像布局方式
                     .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR // 图像被用在交换链中进行呈现操作
                 };
-                myAttachments.push_back(defaultColorAttachment);
+                mAttachments.push_back(defaultColorAttachment);
             }
             RenderSubPass defaultSubPass = {
                 .colorAttachment = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL }
             };
-            myRenderSubPasses.push_back(defaultSubPass);
+            mRenderSubPasses.push_back(defaultSubPass);
         }
 
         // 2. 子流程配置
-        std::vector<VkSubpassDescription> subpassDescription(myRenderSubPasses.size());
-        for (int i = 0; i < myRenderSubPasses.size(); i++) {
-            RenderSubPass subpass = myRenderSubPasses[i];
+        std::vector<VkSubpassDescription> subpassDescription(mRenderSubPasses.size());
+        for (int i = 0; i < mRenderSubPasses.size(); i++) {
+            RenderSubPass subpass = mRenderSubPasses[i];
             if (subpass.inputAttachment.ref >= 0 && subpass.inputAttachment.layout == VK_IMAGE_LAYOUT_UNDEFINED) {
                 subpass.inputAttachment.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // 默认只读
             }
@@ -62,9 +62,9 @@ namespace WannaEngine {
         }
 
         // 子流程之间的依赖关系
-        std::vector<VkSubpassDependency> dependencies(myRenderSubPasses.size() - 1);
-        if (myRenderSubPasses.size() > 1) {
-            for (int i = 0; i < myRenderSubPasses.size(); i++) {
+        std::vector<VkSubpassDependency> dependencies(mRenderSubPasses.size() - 1);
+        if (mRenderSubPasses.size() > 1) {
+            for (int i = 0; i < mRenderSubPasses.size(); i++) {
                 dependencies[i].srcSubpass      = i;
                 dependencies[i].dstSubpass      = i + 1;
                 dependencies[i].srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -80,20 +80,22 @@ namespace WannaEngine {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
-            .attachmentCount = static_cast<uint32_t>(myAttachments.size()),
-            .pAttachments = myAttachments.data(),
-            .subpassCount = static_cast<uint32_t>(myRenderSubPasses.size()),
+            .attachmentCount = static_cast<uint32_t>(mAttachments.size()),
+            .pAttachments = mAttachments.data(),
+            .subpassCount = static_cast<uint32_t>(mRenderSubPasses.size()),
             .pSubpasses = subpassDescription.data(),
             .dependencyCount = static_cast<uint32_t>(dependencies.size()),
             .pDependencies = dependencies.data()
         };
 
         // 创建渲染流程
-        CALL_VK(vkCreateRenderPass(myDevice->getHandle(), &renderPassInfo, nullptr, &myHandle));
-        LOG_TRACE("RenderPass {0} : {1}, attachment count: {2}, subpass count: {3}", __FUNCTION__, (void*)myHandle, myAttachments.size(), myRenderSubPasses.size());
+        CALL_VK(vkCreateRenderPass(mDevice->getHandle(), &renderPassInfo, nullptr, &mHandle));
+        LOG_TRACE("RenderPass {0} : {1}, attachment count: {2}, subpass count: {3}", __FUNCTION__, (void*)mHandle, mAttachments.size(), mRenderSubPasses.size());
     }
+
+    // 析构函数
     WannaVulkanRenderPass::~WannaVulkanRenderPass()
     {
-        VK_DESTROY(RenderPass, myDevice->getHandle(), myHandle);
+        VK_DESTROY(RenderPass, mDevice->getHandle(), mHandle);
     }
 }

@@ -6,7 +6,7 @@
 #include "WannaVulkanDevice.h"
 #include "WannaVulkanSwapChain.h"
 #include "WannaVulkanRenderPass.h"
-
+#include "WannaVulkanFrameBuffer.h"
 
 int main() {
     std::cout << "Hello Wanna Engine!" << std::endl;
@@ -25,6 +25,14 @@ int main() {
     std::shared_ptr<WannaEngine::WannaVulkanSwapChain> swapChain = std::make_shared<WannaEngine::WannaVulkanSwapChain>(vkContext, device.get());
     swapChain->ReCreate();
     std::shared_ptr<WannaEngine::WannaVulkanRenderPass> renderPass = std::make_shared<WannaEngine::WannaVulkanRenderPass>(device.get());
+    
+    std::vector<VkImage> swapChainImages = swapChain->getImages();
+    std::vector<std::shared_ptr<WannaEngine::WannaVulkanFrameBuffer>> frameBuffers;
+    for (const auto &image: swapChainImages) {
+        std::vector<VkImage> images = { image };
+        frameBuffers.push_back(std::make_shared<WannaEngine::WannaVulkanFrameBuffer>(device.get(), renderPass.get(), images, swapChain->getWidth(), swapChain->getHeight()));
+    }
+    
     while (!win->CLOSE())
     {
         win->PollEvent();

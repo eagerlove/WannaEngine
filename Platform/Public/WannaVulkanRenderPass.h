@@ -25,14 +25,14 @@ namespace WannaEngine {
         public:
             WannaVulkanRenderPass(WannaVulkanDevice *device, const std::vector<VkAttachmentDescription> &attachments = {}, const std::vector<RenderSubPass> &renderSubPasses = {});
             ~WannaVulkanRenderPass();
-            VkRenderPass getHandle() const {return myHandle;}
+            VkRenderPass getHandle() const {return mHandle;}
 
         private:
-            VkRenderPass myHandle = VK_NULL_HANDLE;
-            WannaVulkanDevice *myDevice;
+            VkRenderPass mHandle = VK_NULL_HANDLE;
+            WannaVulkanDevice *mDevice;
             
-            std::vector<VkAttachmentDescription> myAttachments;
-            std::vector<RenderSubPass> myRenderSubPasses;
+            std::vector<VkAttachmentDescription> mAttachments;
+            std::vector<RenderSubPass> mRenderSubPasses;
 
     };
 }

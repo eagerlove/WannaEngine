@@ -21,13 +21,13 @@ namespace WannaEngine {
             ~WannaVulkanDevice();
 
             VkDevice getHandle() const {return mHandle;}
-            const WannaVulkanSetting &getSettings() const { return mySettings; }
+            const WannaVulkanSetting &getSettings() const { return mSettings; }
         private:
             VkDevice mHandle = VK_NULL_HANDLE;
-            WannaVulkanSetting mySettings;
+            WannaVulkanSetting mSettings;
 
-            std::vector<std::shared_ptr<WannaVulkanQueue>> myGraphicQueues;
-            std::vector<std::shared_ptr<WannaVulkanQueue>> myPresentQueues;
+            std::vector<std::shared_ptr<WannaVulkanQueue>> mGraphicQueues;
+            std::vector<std::shared_ptr<WannaVulkanQueue>> mPresentQueues;
     };
 }
 

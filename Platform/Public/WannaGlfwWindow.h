@@ -14,9 +14,9 @@ namespace WannaEngine{
             bool CLOSE() override;
             void PollEvent() override;
             void SwapBuffer() override;
-            GLFWwindow* GetWindowHandle() const { return myGlfwWindow; }
+            GLFWwindow* GetWindowHandle() const { return mGlfwWindow; }
         private:
-            GLFWwindow* myGlfwWindow;
+            GLFWwindow* mGlfwWindow;
     };
 }
 #endif

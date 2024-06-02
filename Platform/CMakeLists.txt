@@ -11,6 +11,8 @@ add_library(wanna_platform
     Private/WannaVulkanQueue.cpp
     Private/WannaVulkanSwapChain.cpp
     Private/WannaVulkanRenderPass.cpp
+    Private/WannaVulkanFrameBuffer.cpp
+    Private/WannaVulkanImageView.cpp
 
 )
 
