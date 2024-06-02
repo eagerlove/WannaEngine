@@ -9,7 +9,7 @@ namespace WannaEngine {
 
     // 默认设置
     typedef struct WannaVulkanSetting {
-        VkFormat surfaceFormat = VK_FORMAT_B8G8R8_UNORM;
+        VkFormat surfaceFormat = VK_FORMAT_B8G8R8A8_UNORM;
         VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
         uint32_t swapChainImageCount = 3;
     } WannaVulkanSetting;
