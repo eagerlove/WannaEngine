@@ -11,6 +11,7 @@ namespace WannaEngine {
                 VkAttachmentDescription defaultColorAttachment = {
                     .flags = 0,
                     .format = device->getSettings().surfaceFormat,
+                    .samples = VK_SAMPLE_COUNT_1_BIT, // 采样一次
                     .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR, // 使用一个常量值来清除附着的内容
                     .storeOp = VK_ATTACHMENT_STORE_OP_STORE, // 渲染的内容会被存储起来，以便之后读取
                     .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE, // 不关心附着现存的内容
