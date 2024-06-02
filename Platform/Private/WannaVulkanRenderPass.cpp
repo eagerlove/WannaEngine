@@ -5,7 +5,7 @@ namespace WannaEngine {
     WannaVulkanRenderPass::WannaVulkanRenderPass(WannaVulkanDevice *device, const std::vector<VkAttachmentDescription> &attachments, const std::vector<RenderSubPass> &renderSubPasses) 
     : myDevice(device), myAttachments(attachments), myRenderSubPasses(renderSubPasses) {
 
-        // 1. 默认子流程和附着的构建
+        // 1. 默认子流程及附着的构建
         if (renderSubPasses.empty()) {
             if (attachments.empty()) {
                 VkAttachmentDescription defaultColorAttachment = {
@@ -23,6 +23,7 @@ namespace WannaEngine {
             RenderSubPass defaultSubPass = {
                 .colorAttachment = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL }
             };
+            myRenderSubPasses.push_back(defaultSubPass);
         }
 
         // 2. 子流程配置
@@ -41,41 +42,57 @@ namespace WannaEngine {
             if (subpass.resolveAttachment.ref >= 0 && subpass.resolveAttachment.layout == VK_IMAGE_LAYOUT_UNDEFINED) {
                 subpass.resolveAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // 只读
             }
-
+            // 各附着记录
             VkAttachmentReference inputAttachmentRef[] = {{ static_cast<uint32_t>(subpass.inputAttachment.ref), subpass.inputAttachment.layout }};
             VkAttachmentReference colorAttachmentRef[] = {{ static_cast<uint32_t>(subpass.colorAttachment.ref), subpass.colorAttachment.layout }};
             VkAttachmentReference depthStencilAttachmentRef[] = {{ static_cast<uint32_t>(subpass.depthStencilAttachment.ref), subpass.depthStencilAttachment.layout }};
             VkAttachmentReference resolveAttachmentRef[] = {{ static_cast<uint32_t>(subpass.resolveAttachment.ref), subpass.resolveAttachment.layout }};
+            // description保存子流程信息
             subpassDescription[i].flags = 0;
             subpassDescription[i].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; // 
             subpassDescription[i].inputAttachmentCount = subpass.inputAttachment.ref >= 0 ? ARRAY_SIZE(inputAttachmentRef) : 0;
             subpassDescription[i].pInputAttachments = subpass.inputAttachment.ref >= 0 ? inputAttachmentRef : nullptr;
+            subpassDescription[i].colorAttachmentCount = subpass.colorAttachment.ref >= 0 ? ARRAY_SIZE(colorAttachmentRef) : 0;
+            subpassDescription[i].pColorAttachments = subpass.colorAttachment.ref >= 0 ? colorAttachmentRef : nullptr;
+            subpassDescription[i].pResolveAttachments = subpass.resolveAttachment.ref >= 0 ? resolveAttachmentRef : nullptr;
+            subpassDescription[i].pDepthStencilAttachment = subpass.depthStencilAttachment.ref >= 0 ? depthStencilAttachmentRef : nullptr;
+            subpassDescription[i].preserveAttachmentCount = 0;
+            subpassDescription[i].pPreserveAttachments = nullptr;
         }
-    
-    // VkStructureType                   sType;
-    // const void*                       pNext;
-    // VkRenderPassCreateFlags           flags;
-    // uint32_t                          attachmentCount;
-    // const VkAttachmentDescription*    pAttachments;
-    // uint32_t                          subpassCount;
-    // const VkSubpassDescription*       pSubpasses;
-    // uint32_t                          dependencyCount;
-    // const VkSubpassDependency*        pDependencies;
-        
+
+        // 子流程之间的依赖关系
+        std::vector<VkSubpassDependency> dependencies(myRenderSubPasses.size() - 1);
+        if (myRenderSubPasses.size() > 1) {
+            for (int i = 0; i < myRenderSubPasses.size(); i++) {
+                dependencies[i].srcSubpass      = i;
+                dependencies[i].dstSubpass      = i + 1;
+                dependencies[i].srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+                dependencies[i].dstStageMask    = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+                dependencies[i].srcAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                dependencies[i].dstAccessMask   = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+                dependencies[i].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+            }
+        }
+
+        // 3. 渲染流程创建信息
         VkRenderPassCreateInfo renderPassInfo = {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
-            
-
-
+            .attachmentCount = static_cast<uint32_t>(myAttachments.size()),
+            .pAttachments = myAttachments.data(),
+            .subpassCount = static_cast<uint32_t>(myRenderSubPasses.size()),
+            .pSubpasses = subpassDescription.data(),
+            .dependencyCount = static_cast<uint32_t>(dependencies.size()),
+            .pDependencies = dependencies.data()
         };
 
         // 创建渲染流程
         CALL_VK(vkCreateRenderPass(myDevice->getHandle(), &renderPassInfo, nullptr, &myHandle));
+        LOG_TRACE("RenderPass {0} : {1}, attachment count: {2}, subpass count: {3}", __FUNCTION__, (void*)myHandle, myAttachments.size(), myRenderSubPasses.size());
     }
     WannaVulkanRenderPass::~WannaVulkanRenderPass()
     {
-        
+        VK_DESTROY(RenderPass, myDevice->getHandle(), myHandle);
     }
 }

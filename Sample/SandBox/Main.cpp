@@ -5,6 +5,7 @@
 #include "WannaVulkanContext.h"
 #include "WannaVulkanDevice.h"
 #include "WannaVulkanSwapChain.h"
+#include "WannaVulkanRenderPass.h"
 
 
 int main() {
@@ -23,7 +24,7 @@ int main() {
     std::shared_ptr<WannaEngine::WannaVulkanDevice> device = std::make_shared<WannaEngine::WannaVulkanDevice>(vkContext, 1, 1);
     std::shared_ptr<WannaEngine::WannaVulkanSwapChain> swapChain = std::make_shared<WannaEngine::WannaVulkanSwapChain>(vkContext, device.get());
     swapChain->ReCreate();
-
+    std::shared_ptr<WannaEngine::WannaVulkanRenderPass> renderPass = std::make_shared<WannaEngine::WannaVulkanRenderPass>(device.get());
     while (!win->CLOSE())
     {
         win->PollEvent();
