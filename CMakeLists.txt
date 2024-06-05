@@ -15,6 +15,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # 资源文件夹
 add_definitions(-DWAN_DEFINE_RES_ROOT_DIR=\"${CMAKE_SOURCE_DIR}/Resource\")
+set(WAN_DEFINE_RES_ROOT_DIR "${CMAKE_SOURCE_DIR}/Resource/")
 
 # 跨平台设置
 if (WIN32)
@@ -33,6 +34,9 @@ else ()
 endif()
 
 # 添加文件夹
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(SPIR-V)
+
 include_directories(Platform/Public)
 include_directories(Core/Public)
 

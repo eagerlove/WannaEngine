@@ -20,7 +20,7 @@ namespace WannaEngine {
             WannaVulkanDevice(WannaVulkanContext *context, uint32_t graphicQueueCount, uint32_t presentQueueCount, const WannaVulkanSetting &settings = {});
             ~WannaVulkanDevice();
 
-            VkDevice getHandle() const {return mHandle;}
+            VkDevice getHandle() const { return mHandle; }
             const WannaVulkanSetting &getSettings() const { return mSettings; }
         private:
             VkDevice mHandle = VK_NULL_HANDLE;
