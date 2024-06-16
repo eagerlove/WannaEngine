@@ -9,9 +9,9 @@ namespace WannaEngine {
 
     // 默认设置
     typedef struct WannaVulkanSetting {
-        VkFormat surfaceFormat = VK_FORMAT_B8G8R8A8_UNORM;
-        VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-        uint32_t swapChainImageCount = 3;
+        VkFormat surfaceFormat = VK_FORMAT_B8G8R8A8_UNORM; // 表面纹理
+        VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR; // 显示模式
+        uint32_t swapChainImageCount = 3; // 交换链图像缓存最大个数
     } WannaVulkanSetting;
 
     // 逻辑设备
@@ -21,6 +21,7 @@ namespace WannaEngine {
             ~WannaVulkanDevice();
 
             VkDevice getHandle() const { return mHandle; }
+            VkPipelineCache getPipelineCache() const { return mPipelineCache; }
             const WannaVulkanSetting &getSettings() const { return mSettings; }
         private:
             VkDevice mHandle = VK_NULL_HANDLE;
@@ -28,6 +29,11 @@ namespace WannaEngine {
 
             std::vector<std::shared_ptr<WannaVulkanQueue>> mGraphicQueues;
             std::vector<std::shared_ptr<WannaVulkanQueue>> mPresentQueues;
+
+            VkPipelineCache mPipelineCache = VK_NULL_HANDLE;
+
+            void CreatePipelineCache();
+
     };
 }
 

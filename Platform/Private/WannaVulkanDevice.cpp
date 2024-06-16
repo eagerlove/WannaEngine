@@ -116,6 +116,19 @@ namespace WannaEngine {
             vkGetDeviceQueue(mHandle, presentQueueInfo.queueFamilyIndex, j, &queue);
             mPresentQueues.push_back(std::make_shared<WannaVulkanQueue>(presentQueueInfo.queueFamilyIndex, j, queue, true));
         }
+
+        // 创建管线缓存
+        CreatePipelineCache();
+    }
+
+    void WannaVulkanDevice::CreatePipelineCache() {
+        VkPipelineCacheCreateInfo pipelineCacheInfo = {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+
+        };
+        CALL_VK(vkCreatePipelineCache(mHandle, &pipelineCacheInfo, nullptr, &mPipelineCache));
     }
 
     // 析构函数
