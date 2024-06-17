@@ -9,6 +9,7 @@
 #include "WannaVulkanFrameBuffer.h"
 #include "WannaVulkanPipeline.h"
 #include "WannaVulkanFileUtil.h"
+#include "WannaVulkanCommandBuffer.h"
 
 int main() {
     std::cout << "Hello Wanna Engine!" << std::endl;
@@ -42,6 +43,9 @@ int main() {
     pipeline->SetInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_LINE_LIST)->EnableDepthTest();
     pipeline->SetDynamicState({ VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR });
     pipeline->create();
+
+    std::shared_ptr<WannaEngine::WannaVulkanCommandPool> commandPool = std::make_shared<WannaEngine::WannaVulkanCommandPool>(device.get(), vkContext->GetGraphicQueueFamilyInfo().queueFamilyIndex);
+    std::vector<VkCommandBuffer> commandBuffers = commandPool->AllocateCommandBuffers(swapChainImages.size());
 
     while (!win->CLOSE())
     {

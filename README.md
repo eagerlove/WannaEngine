@@ -23,11 +23,12 @@
 
 Vulkan渲染基本流程：
 - 查询当前环境下支持的层和拓展
-- 再针对这些层和拓展创建Vulkan实例(Instance)
+- 针对层和拓展创建Vulkan实例(Instance)
 - 针对不同系统平台选取窗口表面(Surface)
-- 之后选取物理设备建立逻辑设备
+- 选取物理设备建立逻辑设备
 - 通过命令队列将任务传递给逻辑设备
-- 设置缓冲区 编译着色器 通过交换链在窗口Surface上渲染图形
+- 设置缓冲区 编译着色器 
+- 通过交换链与渲染管线完成渲染
 
 # Accknowedge
 [Vulkan 官方教程](https://vulkan-tutorial.com/)
