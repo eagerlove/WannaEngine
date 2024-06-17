@@ -134,6 +134,7 @@ namespace WannaEngine {
     // 析构函数
     WannaVulkanDevice::~WannaVulkanDevice() {
         vkDeviceWaitIdle(mHandle);
+        VK_DESTROY(PipelineCache, mHandle, mPipelineCache);
         vkDestroyDevice(mHandle, nullptr);
     }
 }

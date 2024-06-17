@@ -55,7 +55,7 @@ namespace WannaEngine {
         VkBool32 stencilTestEnable = VK_FALSE;
     };
 
-    // 管线动态参数
+    // 管线动态参数配置
     struct PipelineDynamicState {
         std::vector<VkDynamicState> dynamicStates;
     };
@@ -67,11 +67,23 @@ namespace WannaEngine {
         PipelineRasterizationState rasterizationState;
         PipelineMultisampleState multisampleState;
         PipelineDepthStencilState depthStencilState;
-        VkPipelineColorBlendAttachmentState colorBlendAttachmentState;
+        VkPipelineColorBlendAttachmentState colorBlendAttachmentState = {
+            .blendEnable = VK_FALSE,
+            .srcColorBlendFactor = VK_BLEND_FACTOR_ONE,
+            .dstColorBlendFactor = VK_BLEND_FACTOR_ZERO,
+            .colorBlendOp = VK_BLEND_OP_ADD,
+            .srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
+            .dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+            .alphaBlendOp = VK_BLEND_OP_ADD,
+            .colorWriteMask = VK_COLOR_COMPONENT_R_BIT
+                              | VK_COLOR_COMPONENT_G_BIT
+                              | VK_COLOR_COMPONENT_B_BIT
+                              | VK_COLOR_COMPONENT_A_BIT
+        };
         PipelineDynamicState dynamicState;
     };
 
-    // 管线布局
+// 管线布局
     class WannaVulkanPipelineLayout {
         public:
             WannaVulkanPipelineLayout(WannaVulkanDevice *device, const std::string &vertexShaderFile, const std::string &fragShaderFile, const ShaderLayout &shaderLayout = {});
@@ -91,7 +103,7 @@ namespace WannaEngine {
             VkResult createShaderModule(const std::string &filePath, VkShaderModule *shaderMoudle);
     };
 
-    // 管线
+// 管线
     class WannaVulkanPipeline {
         public:
             WannaVulkanPipeline(WannaVulkanDevice *device, WannaVulkanRenderPass *renderPass, WannaVulkanPipelineLayout *pipelineLayout);

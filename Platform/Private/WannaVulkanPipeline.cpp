@@ -1,7 +1,7 @@
 #include "WannaVulkanPipeline.h"
 #include "WannaVulkanFileUtil.h"
 #include "WannaVulkanDevice.h"
-
+#include "WannaVulkanRenderPass.h"
 
 namespace WannaEngine {
 
@@ -28,6 +28,8 @@ namespace WannaEngine {
     }
 
     WannaVulkanPipelineLayout::~WannaVulkanPipelineLayout() {
+        VK_DESTROY(ShaderModule, mDevice->getHandle(), mVertexShaderModule);
+        VK_DESTROY(ShaderModule, mDevice->getHandle(), mFragShaderModule);
         VK_DESTROY(PipelineLayout, mDevice->getHandle(), mHandle);
     }
 
@@ -52,9 +54,7 @@ namespace WannaEngine {
     }
 
     WannaVulkanPipeline::~WannaVulkanPipeline() {
-        // vkDestroyPipelineCache
-        // vkDestroyPipelineLayout
-        // vkDestroyPipeline
+        VK_DESTROY(Pipeline, mDevice->getHandle(), mHandle);
     }
 
     WannaVulkanPipeline *WannaVulkanPipeline::SetVertexInputState(const std::vector<VkVertexInputBindingDescription> &vertexBindings,
@@ -64,7 +64,7 @@ namespace WannaEngine {
         return this;
     }
 
-    WannaVulkanPipeline *WannaVulkanPipeline::SetInputAssemblyState(VkPrimitiveTopology topology, VkBool32 primitiveRestartEnable = VK_FALSE) {
+    WannaVulkanPipeline *WannaVulkanPipeline::SetInputAssemblyState(VkPrimitiveTopology topology, VkBool32 primitiveRestartEnable) {
         mPipelineConfig.inputAssemblyState.topology = topology;
         mPipelineConfig.inputAssemblyState.primitiveRestartEnable = primitiveRestartEnable;
         return this;
@@ -84,7 +84,7 @@ namespace WannaEngine {
         return this;
     }
 
-    WannaVulkanPipeline *WannaVulkanPipeline::SetMultisampleState(VkSampleCountFlagBits samples, VkBool32 sampleShadingEnable, float minSampleShading = 0.f) {
+    WannaVulkanPipeline *WannaVulkanPipeline::SetMultisampleState(VkSampleCountFlagBits samples, VkBool32 sampleShadingEnable, float minSampleShading) {
         mPipelineConfig.multisampleState.rasterizationSamples = samples;
         mPipelineConfig.multisampleState.sampleShadingEnable = sampleShadingEnable;
         mPipelineConfig.multisampleState.minSampleShading = minSampleShading;
@@ -101,8 +101,8 @@ namespace WannaEngine {
     }
 
     WannaVulkanPipeline *WannaVulkanPipeline::SetColorBlendAttachmentState(VkBool32 blendEnable,
-                                            VkBlendFactor srcColorBlendFactor = VK_BLEND_FACTOR_ONE, VkBlendFactor dstColorBlendFactor = VK_BLEND_FACTOR_ZERO, VkBlendOp colorBlendOp = VK_BLEND_OP_ADD,
-                                            VkBlendFactor srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE, VkBlendFactor dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO, VkBlendOp alphaBlendOp = VK_BLEND_OP_ADD) {
+                                            VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, VkBlendOp colorBlendOp,
+                                            VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor, VkBlendOp alphaBlendOp) {
         mPipelineConfig.colorBlendAttachmentState.blendEnable = blendEnable;
         mPipelineConfig.colorBlendAttachmentState.srcColorBlendFactor = srcColorBlendFactor;
         mPipelineConfig.colorBlendAttachmentState.dstColorBlendFactor = dstColorBlendFactor;
@@ -211,7 +211,7 @@ namespace WannaEngine {
         
         // 光栅化创建参数
         VkPipelineRasterizationStateCreateInfo rasterizationStateInfo = {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
             .depthClampEnable = mPipelineConfig.rasterizationState.depthClampEnable,
@@ -226,6 +226,56 @@ namespace WannaEngine {
             .lineWidth = mPipelineConfig.rasterizationState.lineWidth
         };
 
+        // 多重采样创建参数
+        VkPipelineMultisampleStateCreateInfo multisampleState = {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .rasterizationSamples = mPipelineConfig.multisampleState.rasterizationSamples,
+            .sampleShadingEnable = mPipelineConfig.multisampleState.sampleShadingEnable,
+            .minSampleShading = mPipelineConfig.multisampleState.minSampleShading,
+            .pSampleMask = nullptr,
+            .alphaToCoverageEnable = VK_FALSE,
+            .alphaToOneEnable = VK_FALSE
+        };
+
+        // 深度模板创建参数
+        VkPipelineDepthStencilStateCreateInfo depthStencilState = {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .depthTestEnable = mPipelineConfig.depthStencilState.depthTestEnable,
+            .depthWriteEnable = mPipelineConfig.depthStencilState.depthWriteEnable,
+            .depthCompareOp = mPipelineConfig.depthStencilState.depthCompareOp,
+            .depthBoundsTestEnable = mPipelineConfig.depthStencilState.depthBoundsTestEnable,
+            .stencilTestEnable = mPipelineConfig.depthStencilState.stencilTestEnable,
+            .front = {},
+            .back = {},
+            .minDepthBounds =  0.0f,
+            .maxDepthBounds = 0.0f
+        };
+
+        // 颜色混合创建参数
+        VkPipelineColorBlendStateCreateInfo colorBlendState = {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .logicOpEnable = VK_FALSE,
+            .logicOp = VK_LOGIC_OP_CLEAR,
+            .attachmentCount = 1,
+            .pAttachments = &mPipelineConfig.colorBlendAttachmentState,
+        };
+        colorBlendState.blendConstants[0] = colorBlendState.blendConstants[1] = colorBlendState.blendConstants[2] = colorBlendState.blendConstants[3] = 0;
+
+        // 动态参数
+        VkPipelineDynamicStateCreateInfo dynamicStateInfo = {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .dynamicStateCount = static_cast<uint32_t>(mPipelineConfig.dynamicState.dynamicStates.size()),
+            .pDynamicStates = mPipelineConfig.dynamicState.dynamicStates.data()
+        };
+
         // 图形管线创建参数
         VkGraphicsPipelineCreateInfo pipelineInfo = {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -238,6 +288,15 @@ namespace WannaEngine {
             .pTessellationState = nullptr, // 曲面细分默认不设置
             .pViewportState = &viewportStateInfo,
             .pRasterizationState = &rasterizationStateInfo,
+            .pMultisampleState = &multisampleState,
+            .pDepthStencilState = &depthStencilState,
+            .pColorBlendState = &colorBlendState,
+            .pDynamicState = &dynamicStateInfo,
+            .layout = mPipelineLayout->getHandle(),
+            .renderPass = mRenderPass->getHandle(),
+            .subpass = 0,
+            .basePipelineHandle = VK_NULL_HANDLE,
+            .basePipelineIndex = 0
 
         };
         CALL_VK(vkCreateGraphicsPipelines(mDevice->getHandle(), mDevice->getPipelineCache(), 1, &pipelineInfo, nullptr ,&mHandle));

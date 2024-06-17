@@ -7,6 +7,8 @@
 #include "WannaVulkanSwapChain.h"
 #include "WannaVulkanRenderPass.h"
 #include "WannaVulkanFrameBuffer.h"
+#include "WannaVulkanPipeline.h"
+#include "WannaVulkanFileUtil.h"
 
 int main() {
     std::cout << "Hello Wanna Engine!" << std::endl;
@@ -32,7 +34,15 @@ int main() {
         std::vector<VkImage> images = { image };
         frameBuffers.push_back(std::make_shared<WannaEngine::WannaVulkanFrameBuffer>(device.get(), renderPass.get(), images, swapChain->getWidth(), swapChain->getHeight()));
     }
-    
+
+    std::shared_ptr<WannaEngine::WannaVulkanPipelineLayout> pipelineLayout = std::make_shared<WannaEngine::WannaVulkanPipelineLayout>(device.get(), 
+                                                                                                                                      WAN_RES_SHADER_DIR"shader.vert",
+                                                                                                                                      WAN_RES_SHADER_DIR"shader.frag");
+    std::shared_ptr<WannaEngine::WannaVulkanPipeline> pipeline = std::make_shared<WannaEngine::WannaVulkanPipeline>(device.get(), renderPass.get(), pipelineLayout.get());
+    pipeline->SetInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_LINE_LIST)->EnableDepthTest();
+    pipeline->SetDynamicState({ VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR });
+    pipeline->create();
+
     while (!win->CLOSE())
     {
         win->PollEvent();
