@@ -9,12 +9,13 @@ namespace WannaEngine {
             WannaVulkanQueue(uint32_t familyIndex, uint32_t index, VkQueue queue, bool canPresent);
             ~WannaVulkanQueue() = default;
 
+            VkQueue getHandle() const { return mHandle; }
             void waitIdle() const;
 
         private:
             uint32_t mFamilyIndex;
             uint32_t mIndex;
-            VkQueue mQueue;
+            VkQueue mHandle;
             bool canPresent;
 
     };

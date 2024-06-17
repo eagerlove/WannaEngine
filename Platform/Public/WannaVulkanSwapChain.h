@@ -13,12 +13,15 @@ namespace WannaEngine {
         VkPresentModeKHR presentMode; // 显示模式
     } SurfaceInfo;
 
+// 交换链
     class WannaVulkanSwapChain {
         public:
             WannaVulkanSwapChain(WannaVulkanContext *context, WannaVulkanDevice *device);
             ~WannaVulkanSwapChain();
 
             bool ReCreate(); 
+            int32_t AcquireImage() const;
+            void Present(int32_t imageIndex) const;
             const std::vector<VkImage> &getImages() const { return mImages; }
             uint32_t getWidth() const { return mSurfaceInfo.capabilities.currentExtent.width; }
             uint32_t getHeight() const { return mSurfaceInfo.capabilities.currentExtent.height; }

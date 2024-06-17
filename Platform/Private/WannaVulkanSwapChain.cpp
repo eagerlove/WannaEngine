@@ -1,6 +1,7 @@
 #include "WannaVulkanSwapChain.h"
 #include "WannaVulkanContext.h"
 #include "WannaVulkanDevice.h"
+#include "WannaVulkanQueue.h"
 
 namespace WannaEngine {
     // 交换链构造函数
@@ -136,6 +137,25 @@ namespace WannaEngine {
         } else {
             mSurfaceInfo.presentMode = presentModes[0];
         }
-        
+    }
+
+    int32_t WannaVulkanSwapChain::AcquireImage() const{
+        uint32_t imageIndex;
+        CALL_VK(vkAcquireNextImageKHR(mDevice->getHandle(), mHandle, UINT64_MAX, VK_NULL_HANDLE, VK_NULL_HANDLE, &imageIndex));
+        return imageIndex;
+    }
+
+    void WannaVulkanSwapChain::Present(int32_t imageIndex) const {
+        VkPresentInfoKHR presentInfo = {
+            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .pNext = nullptr,
+            .waitSemaphoreCount = 0,
+            .pWaitSemaphores = nullptr,
+            .swapchainCount = 1,
+            .pSwapchains = &mHandle,
+            .pImageIndices = reinterpret_cast<const uint32_t *>(&imageIndex)
+        };
+        CALL_VK(vkQueuePresentKHR(mDevice->GetFirstPresentQueue()->getHandle(), &presentInfo));
+        mDevice->GetFirstPresentQueue()->waitIdle();
     }
 }

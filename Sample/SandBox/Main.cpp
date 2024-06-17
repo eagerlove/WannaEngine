@@ -50,6 +50,20 @@ int main() {
     while (!win->CLOSE())
     {
         win->PollEvent();
+
+        // 1. 获取交换链图像
+        int32_t imageIndex = swapChain->AcquireImage();
+
+        // 2. 开启命令缓冲
+        // 3. 开启渲染流程并绑定帧缓冲
+        // 4. 绑定资源
+        // 5. 绘制
+        // 6. 结束渲染流程
+        // 7. 结束命令缓冲
+        // 8. 提交缓冲
+        // 9. 显示
+        swapChain->Present(imageIndex);
+
         win->SwapBuffer();
     }
     
