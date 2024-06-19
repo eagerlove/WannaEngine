@@ -11,20 +11,20 @@ namespace WannaEngine {
         CALL_VK(vkQueueWaitIdle(mHandle));
     }
 
-    void WannaVulkanQueue::submit(std::vector<VkCommandBuffer> commandBuffers) {
+    void WannaVulkanQueue::submit(std::vector<VkCommandBuffer> commandBuffers, const std::vector<VkSemaphore> &waitSemaphores, const std::vector<VkSemaphore> &signalSemaphores, VkFence frameFence) {
         VkPipelineStageFlags waitDstStageMask[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
         VkSubmitInfo submitInfo = {
             .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .pNext = nullptr,
-            .waitSemaphoreCount = 0,
-            .pWaitSemaphores = nullptr,
+            .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
+            .pWaitSemaphores = waitSemaphores.data(),
             .pWaitDstStageMask = waitDstStageMask,
             .commandBufferCount = static_cast<uint32_t>(commandBuffers.size()),
             .pCommandBuffers = commandBuffers.data(),
-            .signalSemaphoreCount = 0,
-            .pSignalSemaphores = nullptr
+            .signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size()), // 队列提交后的信号量
+            .pSignalSemaphores = signalSemaphores.data()
         };
-        CALL_VK(vkQueueSubmit(mHandle, 1, &submitInfo, VK_NULL_HANDLE));
+        CALL_VK(vkQueueSubmit(mHandle, 1, &submitInfo, frameFence));
     }
 
 }

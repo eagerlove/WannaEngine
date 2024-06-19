@@ -13,7 +13,6 @@ namespace WannaEngine {
     // 交换链析构函数
     WannaVulkanSwapChain::~WannaVulkanSwapChain() {
         VK_DESTROY(SwapchainKHR, mDevice->getHandle(), mHandle);
-
     }
 
     // 当窗口发生变更时重建交换链
@@ -64,7 +63,7 @@ namespace WannaEngine {
             .queueFamilyIndexCount = queueFamilyIndexCount,
             .pQueueFamilyIndices = pQueueFamilyIndices,
             .preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
-            .compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR, // if for nvidia, must be VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR
+            .compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR, // VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR is a non-supported value for nvidia
             .presentMode = mSurfaceInfo.presentMode,
             .clipped = VK_FALSE,
             .oldSwapchain = oldSwapchain
@@ -139,18 +138,22 @@ namespace WannaEngine {
         }
     }
 
-    int32_t WannaVulkanSwapChain::AcquireImage() const{
+    int32_t WannaVulkanSwapChain::AcquireImage(VkSemaphore semaphore, VkFence fence) const{
         uint32_t imageIndex;
-        CALL_VK(vkAcquireNextImageKHR(mDevice->getHandle(), mHandle, UINT64_MAX, VK_NULL_HANDLE, VK_NULL_HANDLE, &imageIndex));
+        CALL_VK(vkAcquireNextImageKHR(mDevice->getHandle(), mHandle, UINT64_MAX, semaphore, fence, &imageIndex));
+        if (fence != VK_NULL_HANDLE) {
+            CALL_VK(vkWaitForFences(mDevice->getHandle(), 1, &fence, VK_FALSE, UINT64_MAX));
+            CALL_VK(vkResetFences(mDevice->getHandle(), 1, &fence));
+        }
         return imageIndex;
     }
 
-    void WannaVulkanSwapChain::Present(int32_t imageIndex) const {
+    void WannaVulkanSwapChain::Present(int32_t imageIndex, const std::vector<VkSemaphore> &waitSemaphores) const {
         VkPresentInfoKHR presentInfo = {
             .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
             .pNext = nullptr,
-            .waitSemaphoreCount = 0,
-            .pWaitSemaphores = nullptr,
+            .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
+            .pWaitSemaphores = waitSemaphores.data(),
             .swapchainCount = 1,
             .pSwapchains = &mHandle,
             .pImageIndices = reinterpret_cast<const uint32_t *>(&imageIndex)

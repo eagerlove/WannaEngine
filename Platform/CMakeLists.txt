@@ -20,7 +20,11 @@ add_library(wanna_platform
 
 target_include_directories(wanna_platform PUBLIC External)
 
-# glfw配置
+# glm库配置
+add_subdirectory(External/glm)
+target_link_libraries(wanna_platform PRIVATE glm)
+
+# glfw库配置
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_TESTS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
@@ -28,7 +32,7 @@ option(GLFW_INSTALL OFF)
 add_subdirectory(External/glfw)
 target_link_libraries(wanna_platform PRIVATE glfw)
 
-# vulkan库设置
+# vulkan库配置
 find_package(Vulkan REQUIRED)
 if (Vulkan_FOUND)
     message("Vulkan Exist: ${Vulkan_INCLUDE_DIRS}")

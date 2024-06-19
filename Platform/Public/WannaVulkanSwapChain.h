@@ -20,13 +20,13 @@ namespace WannaEngine {
             ~WannaVulkanSwapChain();
 
             bool ReCreate(); 
-            int32_t AcquireImage() const;
-            void Present(int32_t imageIndex) const;
+            int32_t AcquireImage(VkSemaphore semaphore, VkFence fence = VK_NULL_HANDLE) const;
+            void Present(int32_t imageIndex, const std::vector<VkSemaphore> &waitSemaphores) const;
             const std::vector<VkImage> &getImages() const { return mImages; }
+
             uint32_t getWidth() const { return mSurfaceInfo.capabilities.currentExtent.width; }
             uint32_t getHeight() const { return mSurfaceInfo.capabilities.currentExtent.height; }
 
-        
         private:
             void setSurfaceCapabilities();
 

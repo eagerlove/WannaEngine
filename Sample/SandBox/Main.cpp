@@ -54,12 +54,41 @@ int main() {
         {0.1f, 0.2f, 0.3f, 1.f}
     };
 
+    // 信号量 目前需要两个：1.交换链图像 2.提交队列信号量
+    const uint32_t numBuffer = 2;
+    std::vector<VkSemaphore> imageAvaiableSemaphores(numBuffer);
+    std::vector<VkSemaphore> submitedSemaphores(numBuffer);
+    // 栅栏
+    std::vector<VkFence> frameFences(numBuffer);
+
+    VkSemaphoreCreateInfo semaphoreInfo = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0
+    };
+    VkFenceCreateInfo fenceInfo = {
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VK_FENCE_CREATE_SIGNALED_BIT
+    };
+
+    // 创建信号量和栅栏
+    for (int i = 0; i < numBuffer; i++) {
+        CALL_VK(vkCreateSemaphore(device->getHandle(), &semaphoreInfo, nullptr, &imageAvaiableSemaphores[i]));
+        CALL_VK(vkCreateSemaphore(device->getHandle(), &semaphoreInfo, nullptr, &submitedSemaphores[i]));
+        CALL_VK(vkCreateFence(device->getHandle(), &fenceInfo, nullptr, &frameFences[i]));
+    }
+
+    uint32_t currentBuffer = 0;
     while (!win->CLOSE())
     {
         win->PollEvent();
 
+        CALL_VK(vkWaitForFences(device->getHandle(), 1, &frameFences[currentBuffer], VK_FALSE, UINT64_MAX));
+        CALL_VK(vkResetFences(device->getHandle(), 1, &frameFences[currentBuffer]));
+
         // 1. 获取交换链图像
-        int32_t imageIndex = swapChain->AcquireImage();
+        int32_t imageIndex = swapChain->AcquireImage(imageAvaiableSemaphores[currentBuffer]);
 
         // 2. 开启命令缓冲
         WannaEngine::WannaVulkanCommandPool::BeginCommandBuffer(commandBuffers[imageIndex]);
@@ -93,14 +122,22 @@ int main() {
         WannaEngine::WannaVulkanCommandPool::EndCommandBuffer(commandBuffers[imageIndex]);
 
         // 8. 提交缓冲
-        graphicQueue->submit({ commandBuffers[imageIndex] });
-        graphicQueue->waitIdle(); // 等待队列结束
+        graphicQueue->submit({ commandBuffers[imageIndex]}, { imageAvaiableSemaphores[currentBuffer] }, { submitedSemaphores[currentBuffer] }, frameFences[currentBuffer]);
 
         // 9. 显示
-        swapChain->Present(imageIndex);
+        swapChain->Present(imageIndex, { submitedSemaphores[currentBuffer] });
 
         win->SwapBuffer();
+        currentBuffer = (currentBuffer + 1) % numBuffer;
     }
-    
+
+    // 程序结束 销毁信号量和栅栏
+    for (int i = 0; i < numBuffer; i++) {
+        vkDeviceWaitIdle(device->getHandle()); // 等待逻辑设备处理完成
+        VK_DESTROY(Semaphore, device->getHandle(), imageAvaiableSemaphores[i]);
+        VK_DESTROY(Semaphore, device->getHandle(), submitedSemaphores[i]);
+        VK_DESTROY(Fence, device->getHandle(), frameFences[i]);
+    }
+
     return EXIT_SUCCESS;
 }
