@@ -11,6 +11,7 @@ namespace WannaEngine {
 
             VkQueue getHandle() const { return mHandle; }
             void waitIdle() const;
+            void submit(std::vector<VkCommandBuffer> commandBuffers);
 
         private:
             uint32_t mFamilyIndex;

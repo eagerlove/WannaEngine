@@ -3,9 +3,10 @@
 
 #include "WannaVulkanCommon.h"
 
-
 namespace WannaEngine {
     class WannaVulkanDevice;
+    class WannaVulkanFrameBuffer;
+
     // 附件
     typedef struct Attachment {
         int32_t ref = -1; // 指定被引用附着的索引
@@ -27,10 +28,12 @@ namespace WannaEngine {
             ~WannaVulkanRenderPass();
             VkRenderPass getHandle() const {return mHandle;}
 
+            void BeginRenderPass(VkCommandBuffer commandBuffer, WannaVulkanFrameBuffer *frameBuffer, const std::vector<VkClearValue> &clearValues) const;
+            void EndRenderPass(VkCommandBuffer commandBuffer) const;
         private:
             VkRenderPass mHandle = VK_NULL_HANDLE;
             WannaVulkanDevice *mDevice;
-            
+
             std::vector<VkAttachmentDescription> mAttachments;
             std::vector<RenderSubPass> mRenderSubPasses;
 

@@ -122,6 +122,7 @@ namespace WannaEngine {
             WannaVulkanPipeline *EnableDepthTest(); // 启用深度测试
 
             void create();
+            void bind(VkCommandBuffer commandBuffer);
 
             VkPipeline getHandle() const { return mHandle; }
         private:

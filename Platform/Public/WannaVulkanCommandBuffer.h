@@ -6,10 +6,14 @@
 namespace WannaEngine {
     class WannaVulkanDevice;
 
+// 命令池 用于申请多个命令缓冲区
     class WannaVulkanCommandPool {
         public:
             WannaVulkanCommandPool(WannaVulkanDevice *device, uint32_t queueFamilyIndex);
             ~WannaVulkanCommandPool();
+
+            static void BeginCommandBuffer(VkCommandBuffer commandBuffer);
+            static void EndCommandBuffer(VkCommandBuffer commandBuffer);
 
             std::vector<VkCommandBuffer> AllocateCommandBuffers(uint32_t count) const;
 

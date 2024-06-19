@@ -300,7 +300,10 @@ namespace WannaEngine {
 
         };
         CALL_VK(vkCreateGraphicsPipelines(mDevice->getHandle(), mDevice->getPipelineCache(), 1, &pipelineInfo, nullptr ,&mHandle));
+    }
 
+    void WannaVulkanPipeline::bind(VkCommandBuffer commandBuffer) {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mHandle);
     }
 
 }

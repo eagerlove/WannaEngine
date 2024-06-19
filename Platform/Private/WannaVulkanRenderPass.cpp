@@ -1,5 +1,6 @@
 #include "WannaVulkanRenderPass.h"
 #include "WannaVulkanDevice.h"
+#include "WannaVulkanFrameBuffer.h"
 
 namespace WannaEngine {
     WannaVulkanRenderPass::WannaVulkanRenderPass(WannaVulkanDevice *device, const std::vector<VkAttachmentDescription> &attachments, const std::vector<RenderSubPass> &renderSubPasses) 
@@ -98,4 +99,27 @@ namespace WannaEngine {
     {
         VK_DESTROY(RenderPass, mDevice->getHandle(), mHandle);
     }
+
+    void WannaVulkanRenderPass::BeginRenderPass(VkCommandBuffer commandBuffer, WannaVulkanFrameBuffer *frameBuffer, const std::vector<VkClearValue> &clearValues) const {
+        VkRect2D area = {
+            .offset = { 0, 0 },
+            .extent = { frameBuffer->getWidth(), frameBuffer->getHeight() }
+        };
+        
+        VkRenderPassBeginInfo beginInfo = {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+            .pNext = nullptr,
+            .renderPass = mHandle,
+            .framebuffer = frameBuffer->getHandle(),
+            .renderArea = area,
+            .clearValueCount = static_cast<uint32_t>(clearValues.size()),
+            .pClearValues = clearValues.data()
+        };
+        vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    }
+
+    void WannaVulkanRenderPass::EndRenderPass(VkCommandBuffer commandBuffer) const {
+        vkCmdEndRenderPass(commandBuffer);
+    }
+
 }

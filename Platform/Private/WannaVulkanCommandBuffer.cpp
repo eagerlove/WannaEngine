@@ -2,7 +2,7 @@
 #include "WannaVulkanDevice.h"
 
 namespace WannaEngine {
-// 命令池 用于申请多个命令缓冲区
+
     WannaVulkanCommandPool::WannaVulkanCommandPool(WannaVulkanDevice *device, uint32_t queueFamilyIndex) : mDevice(device){
         VkCommandPoolCreateInfo commandPoolInfo = {
             .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -31,4 +31,20 @@ namespace WannaEngine {
         CALL_VK(vkAllocateCommandBuffers(mDevice->getHandle(), &allocateInfo, commandBuffers.data()));
         return commandBuffers;
     }
+
+    void WannaVulkanCommandPool::BeginCommandBuffer(VkCommandBuffer commandBuffer) {
+        CALL_VK(vkResetCommandBuffer(commandBuffer, 0));
+        VkCommandBufferBeginInfo beginInfo = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .pInheritanceInfo = nullptr
+        };
+        CALL_VK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+    }
+
+    void WannaVulkanCommandPool::EndCommandBuffer(VkCommandBuffer commandBuffer) {
+        CALL_VK(vkEndCommandBuffer(commandBuffer));
+    }
+
 }

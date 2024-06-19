@@ -14,6 +14,10 @@ namespace WannaEngine {
             ~WannaVulkanFrameBuffer();
 
             bool Recreate(const std::vector<VkImage> &images, uint32_t width, uint32_t height);
+
+            VkFramebuffer getHandle() const { return mHandle; }
+            uint32_t getWidth() const { return mWidth; }
+            uint32_t getHeight() const { return mHeight; }
         private:
             VkFramebuffer mHandle = VK_NULL_HANDLE;
             WannaVulkanDevice *mDevice;
