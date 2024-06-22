@@ -138,7 +138,7 @@ int main() {
         },
     };
     pipeline->SetVertexInputState(vertexBindings, vertexAttrs); // 设置顶点输入绑定状态和输入属性
-    pipeline->SetInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);//->EnableDepthTest(); // 开启深度测试
+    pipeline->SetInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)->EnableDepthTest(); // 开启深度测试
     pipeline->SetDynamicState({ VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR }); // 设置动态视口和动态裁剪
     pipeline->create(); // 创建渲染管线
 
