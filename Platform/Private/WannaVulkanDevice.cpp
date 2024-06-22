@@ -1,6 +1,7 @@
 #include "WannaVulkanDevice.h"
 #include "WannaVulkanContext.h"
 #include "WannaVulkanQueue.h"
+#include "WannaVulkanCommandBuffer.h"
 
 namespace WannaEngine {
 
@@ -16,7 +17,7 @@ namespace WannaEngine {
 
     // 构造函数
     WannaVulkanDevice::WannaVulkanDevice(WannaVulkanContext *context, uint32_t graphicQueueCount, uint32_t presentQueueCount, const WannaVulkanSetting &settings) 
-        : mSettings(settings){
+        : mContext(context), mSettings(settings){
         if (!context) {
             LOG_ERROR("Must create a Vulkan graphic context before create device.");
             exit(EXIT_FAILURE);
@@ -117,8 +118,9 @@ namespace WannaEngine {
             mPresentQueues.push_back(std::make_shared<WannaVulkanQueue>(presentQueueInfo.queueFamilyIndex, j, queue, true));
         }
 
-        // 创建管线缓存
         CreatePipelineCache();
+
+        CreateDefaultCommandPool();
     }
 
     void WannaVulkanDevice::CreatePipelineCache() {
@@ -126,7 +128,6 @@ namespace WannaEngine {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
-
         };
         CALL_VK(vkCreatePipelineCache(mHandle, &pipelineCacheInfo, nullptr, &mPipelineCache));
     }
@@ -134,7 +135,40 @@ namespace WannaEngine {
     // 析构函数
     WannaVulkanDevice::~WannaVulkanDevice() {
         vkDeviceWaitIdle(mHandle);
+        mDefaultCmdPool = nullptr;
         VK_DESTROY(PipelineCache, mHandle, mPipelineCache);
         vkDestroyDevice(mHandle, nullptr);
+    }
+
+    void WannaVulkanDevice::CreateDefaultCommandPool() {
+        mDefaultCmdPool = std::make_shared<WannaEngine::WannaVulkanCommandPool>(this, mContext->GetGraphicQueueFamilyInfo().queueFamilyIndex);
+    }
+
+    int32_t WannaVulkanDevice::getMemroyIndex(VkMemoryPropertyFlags memProps, uint32_t memoryTypeBits) const {
+        VkPhysicalDeviceMemoryProperties phyDeviceMemProps = mContext->GetPhysicalDeviceMemoryProperties();
+        if (phyDeviceMemProps.memoryTypeCount == 0) {
+            LOG_ERROR("Physical device memory type count is 0");
+            return -1;
+        }
+        for (int i = 0; i < phyDeviceMemProps.memoryTypeCount; i++) {
+            if ((memoryTypeBits & (1 << i)) && (phyDeviceMemProps.memoryTypes[i].propertyFlags & memProps)) {
+                return i;
+            }
+        }
+        LOG_ERROR("Can't find memory type index: type bit: {0}", memoryTypeBits);
+        return 0;
+    }
+
+    VkCommandBuffer WannaVulkanDevice::beginDefaultCommandBuffer() {
+        VkCommandBuffer commandBuffer = mDefaultCmdPool->AllocateOneCommandBuffer();
+        mDefaultCmdPool->BeginCommandBuffer(commandBuffer);
+        return commandBuffer;
+    }
+
+    void WannaVulkanDevice::submitOneCommandBuffer(VkCommandBuffer commandBuffer) {
+        mDefaultCmdPool->EndCommandBuffer(commandBuffer);
+        WannaVulkanQueue *queue = GetFirstGraphicQueue();
+        queue->submit({ commandBuffer });
+        queue->waitIdle();
     }
 }

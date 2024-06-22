@@ -15,8 +15,8 @@ namespace WannaEngine {
             static void BeginCommandBuffer(VkCommandBuffer commandBuffer);
             static void EndCommandBuffer(VkCommandBuffer commandBuffer);
 
-            std::vector<VkCommandBuffer> AllocateCommandBuffers(uint32_t count) const;
-
+            std::vector<VkCommandBuffer> AllocateCommandBuffer(uint32_t count) const;
+            VkCommandBuffer AllocateOneCommandBuffer() const;
             VkCommandPool getHandle() const { return mHandle; }
         private:
             VkCommandPool mHandle;

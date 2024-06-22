@@ -15,6 +15,8 @@ struct DeviceFeature {
 
 // 销毁函数的封装宏
 #define VK_DESTROY(type, device, obj) if(obj != VK_NULL_HANDLE) vkDestroy##type(device, obj, nullptr)
+#define VK_FREE(device, mem) if(mem != VK_NULL_HANDLE) vkFreeMemory(device, mem, nullptr)
+
 
 /**
  * 检查设备特征可用性
@@ -442,7 +444,6 @@ static const char* vk_present_mode_string(VkPresentModeKHR presentMode){
     return "";
 }
 
-
 // 检查返回结果
 static void checkVulkanResult
 (VkResult result, const char* fileName, uint32_t line, const char* func) {
@@ -451,5 +452,17 @@ static void checkVulkanResult
     }
 }
 
+// 判断是否为深度模式
+static bool IsDepthOnlyFormat(VkFormat format) {
+    return (format == VK_FORMAT_D16_UNORM) || (format == VK_FORMAT_D32_SFLOAT);
+}
+
+// 判断是否为模板模式
+static bool IsDepthStencilFormat(VkFormat format) {
+    return IsDepthOnlyFormat(format)
+           || (format == VK_FORMAT_D16_UNORM_S8_UINT)
+           || (format == VK_FORMAT_D24_UNORM_S8_UINT)
+           || (format == VK_FORMAT_D32_SFLOAT_S8_UINT);
+}
 
 #endif

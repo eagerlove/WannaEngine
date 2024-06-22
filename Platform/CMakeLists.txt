@@ -5,6 +5,7 @@ add_library(wanna_platform
     Private/WannaLog.cpp
     Private/WannaWindow.cpp
     Private/WannaGlfwWindow.cpp
+    Private/WannaGeomtryUtil.cpp
     Private/WannaGraphicContext.cpp
     Private/WannaVulkanContext.cpp
     Private/WannaVulkanDevice.cpp
@@ -12,8 +13,10 @@ add_library(wanna_platform
     Private/WannaVulkanSwapChain.cpp
     Private/WannaVulkanRenderPass.cpp
     Private/WannaVulkanFrameBuffer.cpp
+    Private/WannaVulkanImage.cpp
     Private/WannaVulkanImageView.cpp
     Private/WannaVulkanPipeline.cpp
+    Private/WannaVulkanBuffer.cpp
     Private/WannaVulkanCommandBuffer.cpp
 
 )

@@ -2,11 +2,14 @@
 #include "WannaVulkanDevice.h"
 #include "WannaVulkanRenderPass.h"
 #include "WannaVulkanImageView.h"
+#include "WannaVulkanImage.h"
 
 namespace WannaEngine {
 
-    WannaVulkanFrameBuffer::WannaVulkanFrameBuffer(WannaVulkanDevice *device, WannaVulkanRenderPass *renderPass, const std::vector<VkImage> &images, uint32_t width, uint32_t height)
-                        : mDevice(device), mRenderPass(renderPass), mWidth(width), mHeight(height) {
+    WannaVulkanFrameBuffer::WannaVulkanFrameBuffer(WannaVulkanDevice *device, WannaVulkanRenderPass *renderPass, 
+                                                   const std::vector<std::shared_ptr<WannaVulkanImage>> &images, 
+                                                   uint32_t width, uint32_t height)
+                : mDevice(device), mRenderPass(renderPass), mImages(images), mWidth(width), mHeight(height) {
         Recreate(images, width, height);
     }
 
@@ -14,7 +17,7 @@ namespace WannaEngine {
         VK_DESTROY(Framebuffer, mDevice->getHandle(), mHandle);
     }
 
-    bool WannaVulkanFrameBuffer::Recreate(const std::vector<VkImage> &images, uint32_t width, uint32_t height) {
+    bool WannaVulkanFrameBuffer::Recreate(const std::vector<std::shared_ptr<WannaVulkanImage>> &images, uint32_t width, uint32_t height) {
         VkResult ret;
 
         VK_DESTROY(Framebuffer, mDevice->getHandle(), mHandle);
@@ -25,9 +28,12 @@ namespace WannaEngine {
 
         VkImageView attachments[images.size()];
         for (int i = 0; i < images.size(); i++) {
-            mImageViews.push_back(std::make_shared<WannaVulkanImageView>(mDevice, images[i], mDevice->getSettings().surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT));
+            bool isDepthFormat = IsDepthOnlyFormat(images[i]->getFormat()); // FIX ME 无法区分深度和模板
+            mImageViews.push_back(std::make_shared<WannaVulkanImageView>(mDevice, images[i]->getHandle(), 
+                                                                         images[i]->getFormat(), isDepthFormat ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT));
             attachments[i] = mImageViews[i]->getHandle();
         }
+
         VkFramebufferCreateInfo frameBufferInfo = {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .pNext = nullptr,

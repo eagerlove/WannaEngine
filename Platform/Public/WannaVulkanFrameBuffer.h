@@ -7,13 +7,15 @@ namespace WannaEngine {
     class WannaVulkanDevice;
     class WannaVulkanRenderPass;
     class WannaVulkanImageView;
+    class WannaVulkanImage;
+
     // 帧缓冲
     class WannaVulkanFrameBuffer {
         public:
-            WannaVulkanFrameBuffer(WannaVulkanDevice *device, WannaVulkanRenderPass *renderPass, const std::vector<VkImage> &images, uint32_t width, uint32_t height);
+            WannaVulkanFrameBuffer(WannaVulkanDevice *device, WannaVulkanRenderPass *renderPass, const std::vector<std::shared_ptr<WannaVulkanImage>> &images, uint32_t width, uint32_t height);
             ~WannaVulkanFrameBuffer();
 
-            bool Recreate(const std::vector<VkImage> &images, uint32_t width, uint32_t height);
+            bool Recreate(const std::vector<std::shared_ptr<WannaVulkanImage>> &images, uint32_t width, uint32_t height);
 
             VkFramebuffer getHandle() const { return mHandle; }
             uint32_t getWidth() const { return mWidth; }
@@ -24,6 +26,7 @@ namespace WannaEngine {
             WannaVulkanRenderPass *mRenderPass;
             uint32_t mWidth;
             uint32_t mHeight;
+            std::vector<std::shared_ptr<WannaVulkanImage>> mImages;
             std::vector<std::shared_ptr<WannaVulkanImageView>> mImageViews;
 
     };

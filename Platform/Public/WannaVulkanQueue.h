@@ -11,7 +11,7 @@ namespace WannaEngine {
 
             VkQueue getHandle() const { return mHandle; }
             void waitIdle() const;
-            void submit(std::vector<VkCommandBuffer> commandBuffers, const std::vector<VkSemaphore> &waitSemaphores, const std::vector<VkSemaphore> &signalSemaphores, VkFence frameFence);
+            void submit(std::vector<VkCommandBuffer> commandBuffers, const std::vector<VkSemaphore> &waitSemaphores = {}, const std::vector<VkSemaphore> &signalSemaphores = {}, VkFence frameFence = VK_NULL_HANDLE);
 
         private:
             uint32_t mFamilyIndex;

@@ -5,6 +5,7 @@
 
 #define GLM_FORCE_RADIANS // 角度强制使用弧度制
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE // 深度值 0～1
+#define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
 #include "glm/gtc/random.hpp"
 #include "glm/gtc/type_ptr.hpp"

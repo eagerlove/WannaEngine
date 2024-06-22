@@ -2,9 +2,9 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 // 帧缓冲区0
-layout(location = 0) in vec3 fragColor;
-layout(location = 0) out vec4 outColor;
+layout(location=0) in vec4 vertexColor;
+layout(location=0) out vec4 fragColor;
 
-void main() {
-    outColor = vec4(fragColor, 1.0);
+void main(){
+    fragColor = vertexColor;
 }

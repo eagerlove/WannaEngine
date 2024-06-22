@@ -63,7 +63,7 @@ namespace WannaEngine {
             .queueFamilyIndexCount = queueFamilyIndexCount,
             .pQueueFamilyIndices = pQueueFamilyIndices,
             .preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
-            .compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR, // VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR is a non-supported value for nvidia
+            .compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR, // nvidia显卡目前仅支持 VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR 即不透明颜色
             .presentMode = mSurfaceInfo.presentMode,
             .clipped = VK_FALSE,
             .oldSwapchain = oldSwapchain
